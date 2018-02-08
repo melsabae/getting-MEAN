@@ -1,47 +1,51 @@
-angular
-	.module('loc8rApp')
-	.controller('homeCtrl', homeCtrl);
+(function () {
 
-function homeCtrl ($scope, loc8rData, geolocation) {
-	var vm = this;
-	vm.pageHeader = {
-		title: 'Loc8r',
-		strapline: 'Find places to work with wifi near you!'
-	};
+	angular
+		.module('loc8rApp')
+		.controller('homeCtrl', homeCtrl);
 
-	vm.sidebar = {
-		content: "Looking for wifi and a seat etc etc"
-	};
+	homeCtrl.$inject = ['$scope', 'loc8rData', 'geolocation'];
+	function homeCtrl ($scope, loc8rData, geolocation) {
+		var vm = this;
+		vm.pageHeader = {
+			title: 'Loc8r',
+			strapline: 'Find places to work with wifi near you!'
+		};
 
-	vm.message = "Checking your location";
+		vm.sidebar = {
+			content: "Looking for wifi and a seat etc etc"
+		};
 
-	vm.getData = function(position) {
-		var lat = position.coords.latitude;
-		var lng = position.coords.longitude;
+		vm.message = "Checking your location";
 
-		vm.message = "Searching for nearby places";
+		vm.getData = function(position) {
+			var lat = position.coords.latitude;
+			var lng = position.coords.longitude;
 
-		loc8rData.locationByCoords(lat, lng)
-			.success(function(data) {
-				vm.message = data.length > 0 ? "": "No locations found nearby";
-				vm.data = { locations: data };
-			})
-			.error(function (e) {
-				vm.message = "Sorry, something's gone wrong";
+			vm.message = "Searching for nearby places";
+
+			loc8rData.locationByCoords(lat, lng)
+				.success(function(data) {
+					vm.message = data.length > 0 ? "": "No locations found nearby";
+					vm.data = { locations: data };
+				})
+				.error(function (e) {
+					vm.message = "Sorry, something's gone wrong";
+				});
+		};
+
+		vm.showError = function (error) {
+			$scope.$apply(function() {
+				vm.message = error.message;
 			});
-	};
+		};
 
-	vm.showError = function (error) {
-		$scope.$apply(function() {
-			vm.message = error.message;
-		});
-	};
+		vm.noGeo = function() {
+			$scope.$apply(function() {
+				vm.message = "Geolocation is not supported by this browser.";
+			});
+		};
 
-	vm.noGeo = function() {
-		$scope.$apply(function() {
-			vm.message = "Geolocation is not supported by this browser.";
-		});
-	};
-
-	geolocation.getPosition(vm.getData, vm.showError, vm.noGeo);
-}
+		geolocation.getPosition(vm.getData, vm.showError, vm.noGeo);
+	}
+})();
